@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type ExternalUser = {
   id: number;
@@ -40,24 +40,14 @@ export default function Home() {
   const [loadingEmails, setLoadingEmails] = useState(false);
   const [error, setError] = useState("");
 
-  async function refreshLogs() {
-    const response = await fetch("/api/logs");
-    const payload = await response.json();
-    setLogs(payload.logs ?? "");
-  }
-
-  useEffect(() => {
-    refreshLogs();
-  }, []);
-
   async function fetchUsers() {
     setError("");
     setLoadingUsers(true);
     try {
-      const payload = await postJson<{ users: ExternalUser[] }>("/api/users");
+      const payload = await postJson<{ users: ExternalUser[]; logs?: string }>("/api/users");
       setUsers(payload.users);
       setIdentities([]);
-      await refreshLogs();
+      setLogs(payload.logs ?? "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudieron consultar usuarios");
     } finally {
@@ -69,9 +59,9 @@ export default function Home() {
     setError("");
     setLoadingEmails(true);
     try {
-      const payload = await postJson<{ identities: ContractorIdentity[] }>("/api/emails");
+      const payload = await postJson<{ identities: ContractorIdentity[]; logs?: string }>("/api/emails");
       setIdentities(payload.identities);
-      await refreshLogs();
+      setLogs(payload.logs ?? "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudieron generar correos");
     } finally {
