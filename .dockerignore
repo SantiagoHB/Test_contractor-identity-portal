@@ -1,0 +1,12 @@
+.git
+.venv
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+logs
+output
+*.pyc
+__pycache__
+node_modules
+.next

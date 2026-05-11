@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: democompany-identities:local
+    working_dir: /app
+    volumes:
+      - .:/app
+      - uv-cache:/root/.cache/uv
+    env_file:
+      - .env
+    environment:
+      DEMOCOMPANY_USERS_URL: ${DEMOCOMPANY_USERS_URL:-https://jsonplaceholder.typicode.com/users}
+      DEMOCOMPANY_DOMAIN: ${DEMOCOMPANY_DOMAIN:-democompany.com}
+      DEMOCOMPANY_TIMEOUT_SECONDS: ${DEMOCOMPANY_TIMEOUT_SECONDS:-10}
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: democompany-identities:local
+    working_dir: /app
+    volumes:
+      - .:/app
+      - uv-cache:/root/.cache/uv
+    env_file:
+      - .env
+    command: uv run python -m democompany_identities.portal_api
+    ports:
+      - "8000:8000"
+  web:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      PYTHON_API_URL: http://api:8000
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    command: npm run dev -- --hostname 0.0.0.0
+
+volumes:
+  uv-cache:
