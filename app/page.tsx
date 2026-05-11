@@ -82,6 +82,35 @@ export default function Home() {
   const rows = useMemo<Row[]>(() => (identities.length > 0 ? identities : users), [identities, users]);
   const rowCountLabel = rows.length ? String(rows.length) + " registros disponibles" : "Sin registros todavia";
 
+  function csvCell(value: unknown): string {
+    const text = String(value ?? "");
+    return `"${text.replaceAll('"', '""')}"`;
+  }
+
+  function downloadCsv() {
+    const headers = ["Nombre", "Telefono", "Email original", "Empresa", "Ciudad", "Email corporativo"];
+    const csvRows = rows.map((row) =>
+      [
+        row.full_name ?? row.name,
+        row.phone,
+        row.original_email ?? row.email,
+        row.company,
+        row.city,
+        row.corporate_email ?? "",
+      ]
+        .map(csvCell)
+        .join(","),
+    );
+    const csv = [headers.map(csvCell).join(","), ...csvRows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = identities.length > 0 ? "contractors.csv" : "users.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <main className="shell">
       <section className="topbar">
@@ -119,8 +148,13 @@ export default function Home() {
       <section className="workspace">
         <div className="tablePanel">
           <div className="sectionHeader">
-            <h2>Informacion procesada</h2>
-            <p>{rowCountLabel}</p>
+            <div>
+              <h2>Informacion procesada</h2>
+              <p>{rowCountLabel}</p>
+            </div>
+            <button className="ghost" onClick={downloadCsv} disabled={rows.length === 0}>
+              Descargar CSV
+            </button>
           </div>
           <div className="tableWrap">
             <table>

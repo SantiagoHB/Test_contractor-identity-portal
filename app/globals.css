@@ -48,6 +48,15 @@ button.secondary:hover {
   background: #182231;
 }
 
+button.ghost {
+  background: #eef6f5;
+  color: var(--primary-dark);
+}
+
+button.ghost:hover {
+  background: #d9eeeb;
+}
+
 .shell {
   margin: 0 auto;
   max-width: 1440px;
